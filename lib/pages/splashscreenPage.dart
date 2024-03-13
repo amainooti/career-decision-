@@ -8,7 +8,7 @@ class SplashScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Future<void>.delayed(Duration(seconds: 8), () {
+    Future<void>.delayed(Duration(seconds: 2), () {
       // Navigate to the HomePage after the delay
       Navigator.pushReplacement(
         context,
