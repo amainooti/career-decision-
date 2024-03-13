@@ -88,6 +88,8 @@ class _HomePageState extends State<HomePage> {
 
   late List<String> questions;
   late List<Widget> questionTiles = [];
+  late List<String?> response = List.filled(15, null); // Initialize with nulls
+  int _selectedStreamIndex = 1;
 
   @override
   void initState() {
@@ -146,60 +148,81 @@ class _HomePageState extends State<HomePage> {
     late Widget inputWidget;
     // Determine input widget based on index
     if (index == 0 || index == 2 || index == 3 || index == 8 || index == 9 || index == 12) {
-      // RangeSlider for specific indices
-      inputWidget = RangeSlider(
-        values: RangeValues(1, 100), // Provide initial values for the RangeSlider
-        min: 1,
-        max: 100,
-        divisions: 100,
-        onChanged: (RangeValues values) {
-          // Handle slider value change
+      inputWidget = TextField(
+        keyboardType: TextInputType.number, // Specify numeric keyboard type
+        onChanged: (value) {
+          // Handle text field value change
+          // You can convert the value to int or double here
+          // For example:
+          // int numericValue = int.tryParse(value) ?? 0;
         },
-        // Other properties for RangeSlider
+        decoration: InputDecoration(
+          prefixIcon: Icon(Icons.percent_outlined),
+          border: OutlineInputBorder(),
+        ),
       );
     } else if (index == 1) {
       // Radio buttons for stream
       inputWidget = Column(
         children: [
-          RadioListTile<String>(
-            onChanged: (String? value) {
-              // Handle radio button selection
+          RadioListTile<int>(
+            onChanged: (int? value) {
+              setState(() {
+                _selectedStreamIndex = value ?? 1; // Update selected stream index
+                print(_selectedStreamIndex);
+              });
             },
             title: Text("Science(PCM)"),
-            value: "Science(PCM)",
-            groupValue: null, // Add group value and onChanged handler as needed
+            value: 1,
+            groupValue: _selectedStreamIndex,
           ),
-          RadioListTile<String>(
-            onChanged: (String? value) {
-              // Handle radio button selection
+          RadioListTile<int>(
+            onChanged: (int? value) {
+              setState(() {
+                _selectedStreamIndex = value ?? 1; // Update selected stream index
+                print(_selectedStreamIndex);
+
+              });
             },
             title: Text("Science(PCMB)"),
-            value: "Science(PCMB)",
-            groupValue: null, // Add group value and onChanged handler as needed
+            value: 2,
+            groupValue: _selectedStreamIndex,
           ),
-          RadioListTile<String>(
-            onChanged: (String? value) {
-              // Handle radio button selection
+          RadioListTile<int>(
+            onChanged: (int? value) {
+              setState(() {
+                _selectedStreamIndex = value ?? 1; // Update selected stream index
+                print(_selectedStreamIndex);
+
+              });
             },
             title: Text("Arts/Humanities"),
-            value: "Arts/Humanities",
-            groupValue: null, // Add group value and onChanged handler as needed
+            value: 3,
+            groupValue: _selectedStreamIndex,
           ),
-          RadioListTile<String>(
-            onChanged: (String? value) {
-              // Handle radio button selection
+          RadioListTile<int>(
+            onChanged: (int? value) {
+              setState(() {
+                _selectedStreamIndex = value ?? 1; // Update selected stream index
+                print(_selectedStreamIndex);
+
+              });
             },
             title: Text("Commerce"),
-            value: "Commerce",
-            groupValue: null, // Add group value and onChanged handler as needed
+            value: 4,
+            groupValue: _selectedStreamIndex,
           ),
-          RadioListTile<String>(
-            onChanged: (String? value) {
-              // Handle radio button selection
+          RadioListTile<int>(
+            onChanged: (int? value) {
+              setState(() {
+                _selectedStreamIndex = value ?? 1; // Update selected stream index
+                print(_selectedStreamIndex);
+
+              });
             },
             title: Text("Science(PCB)"),
-            value: "Science(PCB)",
-            groupValue: null, // Add group value and onChanged handler as needed
+            value: 5,
+            groupValue: _selectedStreamIndex,
           ),
         ],
       );
@@ -209,19 +232,23 @@ class _HomePageState extends State<HomePage> {
         children: [
           RadioListTile<String>(
             onChanged: (String? value) {
-              // Handle radio button selection
+              setState(() {
+                response[index] = value; // Update the response list with the selected value
+              });
             },
             title: Text("Yes"),
             value: "Yes",
-            groupValue: null, // Add group value and onChanged handler as needed
+            groupValue: response[index], // Use response[index] as the groupValue
           ),
           RadioListTile<String>(
             onChanged: (String? value) {
-              // Handle radio button selection
+              setState(() {
+                response[index] = value;
+              });
             },
             title: Text("No"),
             value: "No",
-            groupValue: null, // Add group value and onChanged handler as needed
+            groupValue: response[index], // Use response[index] as the groupValue
           ),
         ],
       );
@@ -229,6 +256,7 @@ class _HomePageState extends State<HomePage> {
       // Radio buttons for specific options
       inputWidget = TextField(
         decoration: InputDecoration(
+          hintText: "Example ~Bowling",
           border: OutlineInputBorder(),
         ),
       );
@@ -237,6 +265,7 @@ class _HomePageState extends State<HomePage> {
       // TextField for index 14
       inputWidget = TextField(
         decoration: InputDecoration(
+          hintText: "Example ~Engineering",
           border: OutlineInputBorder(),
         ),
       );
@@ -301,12 +330,13 @@ class _HomePageState extends State<HomePage> {
             child: Text(
               "Questions",
               style: GoogleFonts.lato(
-                  fontSize: 24.5,
-                  fontWeight: FontWeight.w900
+                fontSize: 24.5,
+                fontWeight: FontWeight.w900,
               ),
             ),
           ),
-          ...questionTiles,
+          for (int index = 0; index < questions.length; index++)
+            buildQuestionTile(index),
 
           // Add a submit button that saves as CSV file
           Padding(
@@ -321,8 +351,8 @@ class _HomePageState extends State<HomePage> {
                 "Submit",
                 textAlign: TextAlign.center,
                 style: GoogleFonts.lato(
-                    fontSize: 18,
-                    color: Colors.white
+                  fontSize: 18,
+                  color: Colors.white,
                 ),
               ),
             ),
