@@ -1,79 +1,10 @@
 import 'dart:async';
-import 'package:flutter/material.dart';
 import 'package:career_recommendation_system/components/question_tile.dart';
+import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-
-class CustomToast extends StatefulWidget {
-  final String message;
-  final Color backgroundColor;
-  final Color textColor;
-
-  CustomToast({
-    required this.message,
-    this.backgroundColor = Colors.black54,
-    this.textColor = Colors.white,
-  });
-
-  @override
-  _CustomToastState createState() => _CustomToastState();
-}
-
-class _CustomToastState extends State<CustomToast> {
-  late OverlayEntry _overlayEntry;
-
-  @override
-  void initState() {
-    super.initState();
-    _overlayEntry = _createOverlayEntry();
-    _showOverlay();
-  }
-
-  @override
-  void dispose() {
-    _overlayEntry.remove();
-    super.dispose();
-  }
-
-  OverlayEntry _createOverlayEntry() {
-    return OverlayEntry(
-      builder: (context) => Positioned(
-        top: 100, // Adjust position as needed
-        left: MediaQuery.of(context).size.width * 0.1,
-        right: MediaQuery.of(context).size.width * 0.1,
-        child: Material(
-          color: Colors.transparent,
-          child: Container(
-            padding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
-            decoration: BoxDecoration(
-              color: widget.backgroundColor,
-              borderRadius: BorderRadius.circular(30),
-            ),
-            child: Text(
-              widget.message,
-              style: TextStyle(
-                color: widget.textColor,
-                fontSize: 16,
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  void _showOverlay() {
-    Overlay.of(context).insert(_overlayEntry);
-    // Remove the toast after 2.5 seconds
-    Timer(Duration(milliseconds: 2500), () {
-      _overlayEntry.remove();
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(); // Placeholder widget, actual content is added to overlay
-  }
-}
+import 'package:csv/csv.dart';
+import 'package:path_provider/path_provider.dart';
+import 'dart:io';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -89,7 +20,10 @@ class _HomePageState extends State<HomePage> {
   late List<String> questions;
   late List<Widget> questionTiles = [];
   late List<String?> response = List.filled(15, null); // Initialize with nulls
-  int _selectedStreamIndex = 1;
+  late List<TextEditingController> textControllers =
+  List.generate(15, (index) => TextEditingController());
+
+  String _selectedStreamIndex = "Science(PCM)";
 
   @override
   void initState() {
@@ -113,7 +47,6 @@ class _HomePageState extends State<HomePage> {
       "Rate your reading & writing skills",
       "Rate your negotiating skills from 1-100",
       "What is your hobby?",
-      "Which field you are pursuing right now?"
     ];
 
     // Generate list of QuestionTile widgets
@@ -127,6 +60,9 @@ class _HomePageState extends State<HomePage> {
   void dispose() {
     _scrollController.dispose();
     _timer.cancel(); // Cancel the timer when disposing the widget
+    for (var controller in textControllers) {
+      controller.dispose();
+    }
     super.dispose();
   }
 
@@ -135,26 +71,31 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _startTimer() {
-    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
-      CustomToast(
-        message: "You're almost there!",
-        backgroundColor: Colors.black54,
-        textColor: Colors.white,
-      );
+    _timer = Timer.periodic(Duration(hours: 1), (timer) {
+      print("You're almost there!");
     });
   }
 
   Widget buildQuestionTile(int index) {
     late Widget inputWidget;
     // Determine input widget based on index
-    if (index == 0 || index == 2 || index == 3 || index == 8 || index == 9 || index == 12) {
+    if (index == 0 ||
+        index == 2 ||
+        index == 3 ||
+        index == 8 ||
+        index == 9 ||
+        index == 11 ||
+        index == 12) {
       inputWidget = TextField(
+        controller: textControllers[index],
         keyboardType: TextInputType.number, // Specify numeric keyboard type
         onChanged: (value) {
           // Handle text field value change
-          // You can convert the value to int or double here
-          // For example:
-          // int numericValue = int.tryParse(value) ?? 0;
+          setState(() {
+            response[index] = value.isNotEmpty
+                ? value
+                : null; // Update the response list with the text field value or null if empty
+          });
         },
         decoration: InputDecoration(
           prefixIcon: Icon(Icons.percent_outlined),
@@ -165,75 +106,91 @@ class _HomePageState extends State<HomePage> {
       // Radio buttons for stream
       inputWidget = Column(
         children: [
-          RadioListTile<int>(
-            onChanged: (int? value) {
+          RadioListTile<String>(
+            onChanged: (String? value) {
               setState(() {
-                _selectedStreamIndex = value ?? 1; // Update selected stream index
+                _selectedStreamIndex =
+                    value ?? "Science(PCM)"; // Update selected stream index
+                response[index] =
+                    value ?? "Science(PCM)"; // Update the response list with the selected value
                 print(_selectedStreamIndex);
               });
             },
             title: Text("Science(PCM)"),
-            value: 1,
+            value: "Science(PCM)",
             groupValue: _selectedStreamIndex,
           ),
-          RadioListTile<int>(
-            onChanged: (int? value) {
+          RadioListTile<String>(
+            onChanged: (String? value) {
               setState(() {
-                _selectedStreamIndex = value ?? 1; // Update selected stream index
+                _selectedStreamIndex =
+                    value ?? "Science(PCMB)"; // Update selected stream index
+                response[index] =
+                    value ?? "Science(PCMB)"; // Update the response list with the selected value
                 print(_selectedStreamIndex);
-
               });
             },
             title: Text("Science(PCMB)"),
-            value: 2,
+            value: "Science(PCMB)",
             groupValue: _selectedStreamIndex,
           ),
-          RadioListTile<int>(
-            onChanged: (int? value) {
+          RadioListTile<String>(
+            onChanged: (String? value) {
               setState(() {
-                _selectedStreamIndex = value ?? 1; // Update selected stream index
+                _selectedStreamIndex =
+                    value ?? "Arts/Humanities"; // Update selected stream index
+                response[index] =
+                    value ?? "Arts/Humanities"; // Update the response list with the selected value
                 print(_selectedStreamIndex);
-
               });
             },
             title: Text("Arts/Humanities"),
-            value: 3,
+            value: "Arts/Humanities",
             groupValue: _selectedStreamIndex,
           ),
-          RadioListTile<int>(
-            onChanged: (int? value) {
+          RadioListTile<String>(
+            onChanged: (String? value) {
               setState(() {
-                _selectedStreamIndex = value ?? 1; // Update selected stream index
+                _selectedStreamIndex =
+                    value ?? "Commerce"; // Update selected stream index
+                response[index] =
+                    value ?? "Commerce"; // Update the response list with the selected value
                 print(_selectedStreamIndex);
-
               });
             },
             title: Text("Commerce"),
-            value: 4,
+            value: "Commerce",
             groupValue: _selectedStreamIndex,
           ),
-          RadioListTile<int>(
-            onChanged: (int? value) {
+          RadioListTile<String>(
+            onChanged: (String? value) {
               setState(() {
-                _selectedStreamIndex = value ?? 1; // Update selected stream index
+                _selectedStreamIndex =
+                    value ?? "Science(PCB)"; // Update selected stream index
+                response[index] =
+                    value ?? "Science(PCB)"; // Update the response list with the selected value
                 print(_selectedStreamIndex);
-
               });
             },
             title: Text("Science(PCB)"),
-            value: 5,
+            value: "Science(PCB)",
             groupValue: _selectedStreamIndex,
           ),
         ],
       );
-    } else if (index == 4 || index == 5 || index == 6 || index == 7 || index == 10 || index == 11) {
+    } else if (index == 4 ||
+        index == 5 ||
+        index == 6 ||
+        index == 7 ||
+        index == 10) {
       // Yes/No radio buttons for specific indices
       inputWidget = Column(
         children: [
           RadioListTile<String>(
             onChanged: (String? value) {
               setState(() {
-                response[index] = value; // Update the response list with the selected value
+                response[index] =
+                    value; // Update the response list with the selected value
               });
             },
             title: Text("Yes"),
@@ -252,33 +209,40 @@ class _HomePageState extends State<HomePage> {
           ),
         ],
       );
-    } else if (index == 13) {
+    } else if
+    (index == 13) {
       // Radio buttons for specific options
       inputWidget = TextField(
+        onChanged: (value) {
+          setState(() {
+            response[index] =
+            value.isNotEmpty ? value : null; // Update the response list with the text field value or null if empty
+          });
+        },
+        controller: textControllers[index],
         decoration: InputDecoration(
           hintText: "Example ~Bowling",
           border: OutlineInputBorder(),
         ),
       );
-
-    } else if (index == 14) {
-      // TextField for index 14
-      inputWidget = TextField(
-        decoration: InputDecoration(
-          hintText: "Example ~Engineering",
-          border: OutlineInputBorder(),
-        ),
-      );
-    } else {
+    }  else {
       // TextField for other indices
       inputWidget = TextField(
+        onChanged: (value) {
+          setState(() {
+            response[index] =
+            value.isNotEmpty ? value : null; // Update the response list with the text field value or null if empty
+          });
+        },
+        controller: textControllers[index],
         decoration: InputDecoration(
           border: OutlineInputBorder(),
         ),
       );
     }
 
-    return QuestionTile(question: questions[index], index: index, inputWidget: inputWidget);
+    return QuestionTile(
+        question: questions[index], index: index, inputWidget: inputWidget);
   }
 
   @override
@@ -314,7 +278,8 @@ class _HomePageState extends State<HomePage> {
                     ),
                   ),
                   TextSpan(
-                    text: 'Fill in all questions before hitting submit',
+                    text:
+                    'Fill in all questions before hitting submit',
                     style: GoogleFonts.lato(
                       color: Colors.black,
                       fontStyle: FontStyle.italic,
@@ -340,10 +305,33 @@ class _HomePageState extends State<HomePage> {
 
           // Add a submit button that saves as CSV file
           Padding(
-            padding: const EdgeInsets.symmetric(vertical: 25.0, horizontal: 12),
+            padding:
+            const EdgeInsets.symmetric(vertical: 25.0, horizontal: 12),
             child: MaterialButton(
-              onPressed: () {
-                print("Submit as CSV");
+              onPressed: () async {
+                bool allFilled = true;
+                for (var answer in response) {
+                  if (answer == null) {
+                    allFilled = false;
+                    break;
+                  }
+                }
+                if (allFilled) {
+                  // All fields are filled, proceed with submitting data
+                  print("Submitted as Array");
+                  // Print out the list of responses
+                  print(response);
+
+                  // List<List<dynamic>> rows = [
+                  //   questions,
+                  //   response.map((value) => value ?? "").toList()
+                  // ];
+                  // await _saveAsCSV(rows);
+                } else {
+                  // Show error message
+                  print("Please fill in all questions!");
+                  print("There was an Error");
+                }
               },
               color: Colors.deepPurple,
               padding: EdgeInsets.symmetric(vertical: 22),
@@ -361,5 +349,14 @@ class _HomePageState extends State<HomePage> {
       ),
     );
   }
+
+// Future<void> _saveAsCSV(List<List<dynamic>> rows) async {
+//   String csv = const ListToCsvConverter().convert(rows);
+//   final directory = await getApplicationDocumentsDirectory();
+//   final path = '${directory.path}/survey_data.csv';
+//   File file = File(path);
+//   await file.writeAsString(csv);
+//   print('CSV file saved to $path');
+// }
 }
 
