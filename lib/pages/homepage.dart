@@ -19,7 +19,7 @@ class _HomePageState extends State<HomePage> {
 
   late List<String> questions;
   late List<Widget> questionTiles = [];
-  late List<String?> response = List.filled(15, null); // Initialize with nulls
+  late List<String?> response = List.filled(14, null); // Initialize with nulls
   late List<TextEditingController> textControllers =
   List.generate(15, (index) => TextEditingController());
 
@@ -78,6 +78,7 @@ class _HomePageState extends State<HomePage> {
 
   Widget buildQuestionTile(int index) {
     late Widget inputWidget;
+
     // Determine input widget based on index
     if (index == 0 ||
         index == 2 ||
@@ -91,6 +92,7 @@ class _HomePageState extends State<HomePage> {
         keyboardType: TextInputType.number, // Specify numeric keyboard type
         onChanged: (value) {
           // Handle text field value change
+          print("Question $index, Value: $value");
           setState(() {
             response[index] = value.isNotEmpty
                 ? value
@@ -100,7 +102,30 @@ class _HomePageState extends State<HomePage> {
         decoration: InputDecoration(
           prefixIcon: Icon(Icons.percent_outlined),
           border: OutlineInputBorder(),
+          errorText: (index == 0 ||
+              index == 2 ||
+              index == 3 ||
+              index == 8 ||
+              index == 9 ||
+              index == 11 ||
+              index == 12) &&
+              response[index] != null &&
+              (int.tryParse(response[index]!) == null ||
+                  int.parse(response[index]!) < 20)
+              ? 'Score should be greater than or equal to 20'
+              : (index == 0 ||
+              index == 2 ||
+              index == 3 ||
+              index == 8 ||
+              index == 9 ||
+              index == 11 ||
+              index == 12) &&
+              response[index] != null &&
+              int.parse(response[index]!) > 100
+              ? 'Score should be less than or equal to 100'
+              : null,
         ),
+
       );
     } else if (index == 1) {
       // Radio buttons for stream
@@ -112,8 +137,9 @@ class _HomePageState extends State<HomePage> {
                 _selectedStreamIndex =
                     value ?? "Science(PCM)"; // Update selected stream index
                 response[index] =
-                    value ?? "Science(PCM)"; // Update the response list with the selected value
-                print(_selectedStreamIndex);
+                    value ??
+                        "Science(PCM)"; // Update the response list with the selected value
+                print("Question $index, Value: $value");
               });
             },
             title: Text("Science(PCM)"),
@@ -126,8 +152,9 @@ class _HomePageState extends State<HomePage> {
                 _selectedStreamIndex =
                     value ?? "Science(PCMB)"; // Update selected stream index
                 response[index] =
-                    value ?? "Science(PCMB)"; // Update the response list with the selected value
-                print(_selectedStreamIndex);
+                    value ??
+                        "Science(PCMB)"; // Update the response list with the selected value
+                print("Question $index, Value: $value");
               });
             },
             title: Text("Science(PCMB)"),
@@ -140,8 +167,9 @@ class _HomePageState extends State<HomePage> {
                 _selectedStreamIndex =
                     value ?? "Arts/Humanities"; // Update selected stream index
                 response[index] =
-                    value ?? "Arts/Humanities"; // Update the response list with the selected value
-                print(_selectedStreamIndex);
+                    value ??
+                        "Arts/Humanities"; // Update the response list with the selected value
+                print("Question $index, Value: $value");
               });
             },
             title: Text("Arts/Humanities"),
@@ -154,8 +182,9 @@ class _HomePageState extends State<HomePage> {
                 _selectedStreamIndex =
                     value ?? "Commerce"; // Update selected stream index
                 response[index] =
-                    value ?? "Commerce"; // Update the response list with the selected value
-                print(_selectedStreamIndex);
+                    value ??
+                        "Commerce"; // Update the response list with the selected value
+                print("Question $index, Value: $value");
               });
             },
             title: Text("Commerce"),
@@ -168,8 +197,9 @@ class _HomePageState extends State<HomePage> {
                 _selectedStreamIndex =
                     value ?? "Science(PCB)"; // Update selected stream index
                 response[index] =
-                    value ?? "Science(PCB)"; // Update the response list with the selected value
-                print(_selectedStreamIndex);
+                    value ??
+                        "Science(PCB)"; // Update the response list with the selected value
+                print("Question $index, Value: $value");
               });
             },
             title: Text("Science(PCB)"),
@@ -191,6 +221,7 @@ class _HomePageState extends State<HomePage> {
               setState(() {
                 response[index] =
                     value; // Update the response list with the selected value
+                print("Question $index, Value: $value");
               });
             },
             title: Text("Yes"),
@@ -201,6 +232,7 @@ class _HomePageState extends State<HomePage> {
             onChanged: (String? value) {
               setState(() {
                 response[index] = value;
+                print("Question $index, Value: $value");
               });
             },
             title: Text("No"),
@@ -209,48 +241,57 @@ class _HomePageState extends State<HomePage> {
           ),
         ],
       );
-    } else if
-    (index == 13) {
+    } else if (index == 13) {
       // Radio buttons for specific options
       inputWidget = TextField(
         onChanged: (value) {
           setState(() {
-            response[index] =
-            value.isNotEmpty ? value : null; // Update the response list with the text field value or null if empty
+            response[index] = value.isNotEmpty
+                ? value
+                : null; // Update the response list with the text field value or null if empty
+            print("Question $index, Value: $value");
           });
         },
         controller: textControllers[index],
         decoration: InputDecoration(
           hintText: "Example ~Bowling",
           border: OutlineInputBorder(),
+          errorText: response[index] == null ? 'Please enter a value' : null,
         ),
       );
-    }  else {
+    } else {
       // TextField for other indices
       inputWidget = TextField(
         onChanged: (value) {
           setState(() {
-            response[index] =
-            value.isNotEmpty ? value : null; // Update the response list with the text field value or null if empty
+            response[index] = value.isNotEmpty
+                ? value
+                : null; // Update the response list with the text field value or null if empty
+            print("Question $index, Value: $value");
           });
         },
         controller: textControllers[index],
         decoration: InputDecoration(
           border: OutlineInputBorder(),
+          errorText: response[index] == null ? 'Please enter a value' : null,
+
         ),
       );
     }
 
     return QuestionTile(
-        question: questions[index], index: index, inputWidget: inputWidget);
+      question: questions[index],
+      index: index,
+      inputWidget: inputWidget,
+    );
   }
+
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.deepPurple,
-        leading: Center(child: Icon(Icons.menu, color: Colors.white)),
         title: Text(
           "Survey Data",
           style: GoogleFonts.lato(fontSize: 18.5, color: Colors.white),
@@ -305,31 +346,68 @@ class _HomePageState extends State<HomePage> {
 
           // Add a submit button that saves as CSV file
           Padding(
-            padding:
-            const EdgeInsets.symmetric(vertical: 25.0, horizontal: 12),
+            padding: const EdgeInsets.symmetric(vertical: 25.0, horizontal: 12),
             child: MaterialButton(
               onPressed: () async {
                 bool allFilled = true;
-                for (var answer in response) {
-                  if (answer == null) {
+                List<int> unfilledQuestions = [];
+                for (int i = 0; i < response.length; i++) {
+                  if (response[i] == null ||
+                      (response[i] is String && response[i]!.isEmpty)) {
                     allFilled = false;
-                    break;
+                    unfilledQuestions.add(i + 1);
                   }
                 }
+                // Inside the onPressed callback of your submit button
                 if (allFilled) {
                   // All fields are filled, proceed with submitting data
                   print("Submitted as Array");
                   // Print out the list of responses
                   print(response);
+                  String recommendation = calculateRecommendation(response);
+                  print("Recommendation: $recommendation");
 
-                  // List<List<dynamic>> rows = [
-                  //   questions,
-                  //   response.map((value) => value ?? "").toList()
-                  // ];
-                  // await _saveAsCSV(rows);
+                  // Display recommendation as a widget with an icon
+                  showDialog(
+                    context: context,
+                    builder: (context) =>
+                        AlertDialog(
+                          title: Text("Recommendation 🤖"),
+                          content: Row(
+                            children: [
+                              Icon(Icons.check, color: Colors.green),
+                              SizedBox(width: 10),
+                              Text(recommendation),
+                            ],
+                          ),
+                          actions: [
+                            TextButton(
+                              onPressed: () {
+                                Navigator.pop(context); // Close the dialog
+                              },
+                              child: Text("Close"),
+                            ),
+                          ],
+                        ),
+                  );
                 } else {
                   // Show error message
-                  print("Please fill in all questions!");
+                  showDialog(
+                    context: context,
+                    builder: (context) =>
+                        AlertDialog(
+                          title: Text("Error ❌"),
+                          content: Text("Please fill in all questions!"),
+                          actions: [
+                            TextButton(
+                              onPressed: () {
+                                Navigator.pop(context); // Close the dialog
+                              },
+                              child: Text("Close"),
+                            ),
+                          ],
+                        ),
+                  );
                   print("There was an Error");
                 }
               },
@@ -345,11 +423,117 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
           )
+
+
         ],
       ),
     );
   }
 
+  String calculateRecommendation(List<String?> responses) {
+    // Extract relevant responses for easier access
+    String stream = responses[1] ?? ""; // Stream selection
+    int? class12Percentage = int.tryParse(responses[3] ?? ""); // Class 12 percentage
+    String? hobby = responses[13]; // Hobby
+
+    // Regular expressions to match hobby patterns
+    RegExp engineeringRegex = RegExp(
+        r"(engineer|engineering|mechanic|machine|robot|robotics|electronic|mechanical|aeronautics|aircraft)",
+        caseSensitive: false);
+    RegExp medicalRegex = RegExp(
+        r"(medical|medicine|doctor|hospital|clinic|surgeon|physician|biomedical|biotech)",
+        caseSensitive: false);
+    RegExp lawRegex = RegExp(
+        r"(law|lawyer|legal|court|justice|attorney|advocate)",
+        caseSensitive: false);
+    RegExp businessRegex = RegExp(
+        r"(business|finance|economics|trade|market|investment|entrepreneur)",
+        caseSensitive: false);
+    RegExp artsRegex =
+    RegExp(r"(art|artist|paint|painting|draw|drawing|music|dance|singer|dancing)",
+        caseSensitive: false);
+    RegExp politicalScienceRegex = RegExp(
+        r"(political science|politics|government|political|public administration)",
+        caseSensitive: false);
+
+    // Check if hobby matches certain patterns
+    bool hobbyInvolvesEngineering = engineeringRegex.hasMatch(hobby ?? "");
+    bool hobbyInvolvesMedical = medicalRegex.hasMatch(hobby ?? "");
+    bool hobbyInvolvesLaw = lawRegex.hasMatch(hobby ?? "");
+    bool hobbyInvolvesBusiness = businessRegex.hasMatch(hobby ?? "");
+    bool hobbyInvolvesArts = artsRegex.hasMatch(hobby ?? "");
+    bool hobbyInvolvesPoliticalScience =
+    politicalScienceRegex.hasMatch(hobby ?? "");
+
+    // Additional conditions for more specific recommendations
+    if (stream == "Science(PCMB)") {
+      // For PCMB stream
+      if (class12Percentage != null && class12Percentage >= 80 &&
+          hobbyInvolvesMedical) {
+        // Very high score in class 12 and hobby involves medical
+        return "Medicine";
+      } else if (class12Percentage != null && class12Percentage >= 70 &&
+          hobbyInvolvesEngineering) {
+        // High score in class 12 and hobby involves engineering
+        return "Aeronautics";
+      } else {
+        // Recommend other science-related fields
+        return "Biotech or Env Science";
+      }
+    } else if (stream == "Science(PCB)") {
+      // For PCB stream
+      if (class12Percentage != null && class12Percentage >= 80 &&
+          hobbyInvolvesMedical) {
+        // Very high score in class 12 and hobby involves medical
+        return "Medicine";
+      } else {
+        // Recommend other medical science-related fields
+        return "Biomedical Engineering";
+      }
+    } else if (stream == "Science(PCM)") {
+      // For PCM stream
+      if (class12Percentage != null && class12Percentage >= 70 &&
+          hobbyInvolvesEngineering) {
+        // High score in class 12 and hobby involves engineering
+        return "Engineering";
+      } else {
+        // Recommend engineering without specifying a field
+        return "Engineering";
+      }
+    } else if (stream == "Commerce") {
+      // For Commerce stream
+      if (class12Percentage != null && class12Percentage >= 70 &&
+          hobbyInvolvesBusiness) {
+        // High score in class 12 and hobby involves business
+        return "Finance";
+      } else {
+        // Recommend business-related fields
+        return "Business Administration";
+      }
+    } else if (stream == "Arts/Humanities") {
+      // For Arts/Humanities stream
+      if (class12Percentage != null && class12Percentage >= 70 &&
+          hobbyInvolvesLaw) {
+        // High score in class 12 and hobby involves law
+        return "Law";
+      } else if (class12Percentage != null && class12Percentage >= 70 &&
+          hobbyInvolvesPoliticalScience) {
+        // High score in class 12 and hobby involves political science
+        return "Political Science";
+      } else {
+        // Recommend other arts-related fields
+        return "Sociology or History";
+      }
+    } else {
+      return "Not determined";
+    }
+  }
+
+
+
+
+
+}
 // Future<void> _saveAsCSV(List<List<dynamic>> rows) async {
 //   String csv = const ListToCsvConverter().convert(rows);
 //   final directory = await getApplicationDocumentsDirectory();
@@ -358,5 +542,5 @@ class _HomePageState extends State<HomePage> {
 //   await file.writeAsString(csv);
 //   print('CSV file saved to $path');
 // }
-}
+
 
